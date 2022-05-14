@@ -13,7 +13,7 @@ from torchplus.nn import Empty
 from torchplus.tools import change_default_args
 
 
-class PFNLayer(nn.Module):
+class PFNLayer(nn.Module): # Pillar Feature Net Layer，Piller 特征编码层
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -28,7 +28,7 @@ class PFNLayer(nn.Module):
         :param use_norm: <bool>. Whether to include BatchNorm.
         :param last_layer: <bool>. If last_layer, there is no concatenation of features.
         """
-
+        
         super().__init__()
         self.name = 'PFNLayer'
         self.last_vfe = last_layer
@@ -101,7 +101,7 @@ class PillarFeatureNet(nn.Module):
             else:
                 last_layer = True
             pfn_layers.append(PFNLayer(in_filters, out_filters, use_norm, last_layer=last_layer))
-        self.pfn_layers = nn.ModuleList(pfn_layers)
+        self.pfn_layers = nn.ModuleList(pfn_layers)# 对PFNlayer做一个堆叠
 
         # Need pillar (voxel) size and x/y offset in order to calculate pillar offset
         self.vx = voxel_size[0]
@@ -163,11 +163,13 @@ class PointPillarsScatter(nn.Module):
     def forward(self, voxel_features, coords, batch_size):
 
         # batch_canvas will be the final output.
+        # canvas 帆布，画布，油画
         batch_canvas = []
         for batch_itt in range(batch_size):
             # Create the canvas for this sample
+            # 创建一个特定大小的0 tensor
             canvas = torch.zeros(self.nchannels, self.nx * self.ny, dtype=voxel_features.dtype,
-                                 device=voxel_features.device)
+                                 device=voxel_features.device) 
 
             # Only include non-empty pillars
             batch_mask = coords[:, 0] == batch_itt
